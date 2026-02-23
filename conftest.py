@@ -107,3 +107,12 @@ def user_login(page_manager, browser, request):
             password=credentials["password"]
         )
     return page_manager
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    if rep.when == "call" and rep.failed:
+        browser = item.funcargs.get("browser")
+        if browser:
+            browser.save_screenshot(f"reports/screenshots/{item.name}.png")
