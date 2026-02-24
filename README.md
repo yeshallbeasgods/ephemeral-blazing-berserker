@@ -14,19 +14,24 @@ A Python Selenium test automation framework targeting the [Sauce Demo](https://w
 ```
 ephemeral-blazing-berserker/
 ├── config/
-│   └── settings.py         # Environment and user configuration
+│   └── settings.py             # Environment and user configuration
 ├── pages/
-│   └── page_manager.py     # Central page object registry
-├── tests/
-│   └── test_*.py           # Test suites
-├── utils/
-│   └── browser_utils.py    # Reusable WebDriver utilities
-├── reports/                # Auto-generated HTML test reports
-├── conftest.py             # Fixtures and browser configuration
-├── pytest.ini              # pytest settings and markers
-├── requirements.txt        # Python dependencies
-├── .env                    # Local environment variables (not committed)
-└── .env.example            # Environment variable template
+│   ├── base_page.py            # Shared page object base class
+│   ├── page_manager.py         # Central page object registry
+│   ├── components/
+│   ├── mobile/
+│   └── web/
+│       ├── cart_page.py
+│       ├── inventory_page.py
+│       └── login_page.py
+├── tests/                      # Test suites (in progress)
+├── utils/                      # Reusable WebDriver utilities (in progress)
+├── reports/                    # Auto-generated HTML test reports
+├── conftest.py                 # Fixtures and browser configuration
+├── pytest.ini                  # pytest settings and markers
+├── requirements.txt            # Python dependencies
+├── .env                        # Local environment variables (not committed)
+└── .env.example                # Environment variable template
 ```
 
 ## Setup
@@ -100,11 +105,6 @@ pytest -m mobile --custom-device=android
 pytest --user-type=standard
 pytest --user-type=locked_out
 pytest --user-type=problem
-```
-
-### Run with a specific environment
-```bash
-pytest --env=production
 ```
 
 ### Combine options
