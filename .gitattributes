@@ -1,0 +1,4 @@
+reports/ linguist-generated=true
+reports/ linguist-vendored=true
+*.html linguist-generated=true
+venv/ linguist-vendored=true
