@@ -20,7 +20,7 @@ class TestCartSmoke:
         ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
         ebb.inventory_page.add_to_cart("Sauce Labs Bike Light")
         assert ebb.inventory_page.get_cart_badge_count() == 2
-        ebb.header.cart_icon().click()
+        ebb.inventory_page.cart_icon().click()
         ebb.wait.until(ec.url_contains("cart"))
         cart_items = ebb.cart_page.get_cart_item_names()
         assert "Sauce Labs Backpack" in cart_items

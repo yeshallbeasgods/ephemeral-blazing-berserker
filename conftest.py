@@ -31,16 +31,27 @@ def _build_driver(request):
 
     if name == "chrome":
         options = ChromeOptions()
+        options.add_argument("--password-store=basic")
         if mobile_active:
             options.add_experimental_option("mobileEmulation", {
                 "deviceMetrics": {"width": width, "height": height, "pixelRatio": pixel_ratio},
                 "userAgent": user_agent
             })
+        options.add_experimental_option("prefs", {
+            "credentials_enable_service": False,
+            "profile.password_manager_enabled": False,
+            "profile.password_manager_leak_detection": False
+        })
         driver = webdriver.Chrome(options=options)
 
     elif name == "edge":
         options = EdgeOptions()
         options.use_chromium = True
+        options.add_experimental_option("prefs", {
+            "credentials_enable_service": False,
+            "profile.password_manager_enabled": False,
+            "profile.password_manager_leak_detection": False
+        })
         if mobile_active:
             options.add_experimental_option("mobileEmulation", {  # type: ignore
                 "deviceMetrics": {"width": width, "height": height, "pixelRatio": pixel_ratio},
