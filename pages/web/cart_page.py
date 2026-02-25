@@ -10,7 +10,6 @@ class CartPage(HeaderComponent):
     ITEM_QUANTITIES = (By.CSS_SELECTOR, "[data-test='item-quantity']")
     CONTINUE_SHOPPING_BUTTON = (By.CSS_SELECTOR, "[data-test='continue-shopping']")
     CHECKOUT_BUTTON = (By.CSS_SELECTOR, "[data-test='checkout']")
-    CART_BADGE = (By.CSS_SELECTOR, "[data-test='shopping-cart-badge']")
 
     @staticmethod
     def _slug(item_name):
@@ -31,12 +30,6 @@ class CartPage(HeaderComponent):
 
     def get_cart_item_count(self):
         return len(self.driver.find_elements(*self.CART_ITEMS))
-
-    def get_cart_badge_count(self):
-        try:
-            return int(self.driver.find_element(*self.CART_BADGE).text)
-        except:
-            return 0
 
     def click_checkout(self):
         self.driver.find_element(*self.CHECKOUT_BUTTON).click()

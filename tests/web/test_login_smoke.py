@@ -2,7 +2,7 @@ import pytest
 from selenium.webdriver.support import expected_conditions as ec
 
 class TestLoginSmoke:
-
+    
     @pytest.mark.smoke
     def test_successful_login(self, user_login, browser):
         ebb = user_login

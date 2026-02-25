@@ -11,9 +11,13 @@ class HeaderComponent(BasePage):
     CLOSE_MENU_BUTTON = (By.CSS_SELECTOR, "[data-test='close-menu']")
     PAGE_TITLE = (By.CSS_SELECTOR, "[data-test='title']")
     SORT_DROPDOWN = (By.CSS_SELECTOR, "[data-test='product-sort-container']")
+    CART_BADGE = (By.CSS_SELECTOR, "[data-test='shopping-cart-badge']")
 
     def open_menu(self):
         self.driver.find_element(*self.MENU_BUTTON).click()
+
+    def cart_icon(self):
+        return self.driver.find_element(*self.CART_LINK)
 
     def logout(self):
         self.open_menu()
@@ -26,3 +30,9 @@ class HeaderComponent(BasePage):
     def sort_products(self, option_value):
         from selenium.webdriver.support.ui import Select
         Select(self.driver.find_element(*self.SORT_DROPDOWN)).select_by_value(option_value)
+
+    def get_cart_badge_count(self):
+        try:
+            return int(self.driver.find_element(*self.CART_BADGE).text)
+        except:
+            return 0
