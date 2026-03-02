@@ -8,7 +8,7 @@ class TestCartSmoke:
         ebb = user_login
         ebb.wait.until(ec.url_contains("inventory"))
         ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
-        assert ebb.inventory_page.get_cart_badge_count() == 1
+        ebb.inventory_page.wait_for_cart_count(1)
         ebb.inventory_page.cart_icon().click()
         ebb.wait.until(ec.url_contains("cart"))
         assert "Sauce Labs Backpack" in ebb.cart_page.get_cart_item_names()
@@ -19,7 +19,7 @@ class TestCartSmoke:
         ebb.wait.until(ec.url_contains("inventory"))
         ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
         ebb.inventory_page.add_to_cart("Sauce Labs Bike Light")
-        assert ebb.inventory_page.get_cart_badge_count() == 2
+        ebb.inventory_page.wait_for_cart_count(2)
         ebb.inventory_page.cart_icon().click()
         ebb.wait.until(ec.url_contains("cart"))
         cart_items = ebb.cart_page.get_cart_item_names()
@@ -35,7 +35,8 @@ class TestCartSmoke:
         ebb.inventory_page.cart_icon().click()
         ebb.wait.until(ec.url_contains("cart"))
         ebb.cart_page.remove_item("Sauce Labs Bike Light")
+        ebb.cart_page.wait_for_cart_count(1)
         cart_items = ebb.cart_page.get_cart_item_names()
         assert "Sauce Labs Bike Light" not in cart_items
         assert "Sauce Labs Backpack" in cart_items
-        assert ebb.cart_page.get_cart_badge_count() == 1
+        

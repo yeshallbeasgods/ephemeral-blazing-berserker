@@ -7,5 +7,5 @@ class BasePage:
         if not isinstance(driver, WebDriver):
             raise TypeError("driver must be an instance of selenium.webdriver.remote.webdriver.WebDriver")
         self.driver = driver
-        self.wait = WebDriverWait(driver, 10)
+        self.wait = WebDriverWait(driver, 10) # handles most standard wait scenarios
         self.timeout = 10

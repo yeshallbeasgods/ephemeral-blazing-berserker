@@ -6,7 +6,7 @@ class TestLoginSmoke:
     @pytest.mark.smoke
     def test_successful_login(self, user_login, browser):
         ebb = user_login
-        assert "inventory" in browser.current_url, "Login did not reach inventory page"
+        ebb.wait.until(ec.url_contains("inventory"))
         assert ebb.inventory_page.get_page_title() == "Products", "Inventory page title not found"
 
     @pytest.mark.smoke

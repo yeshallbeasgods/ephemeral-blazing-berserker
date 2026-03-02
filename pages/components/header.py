@@ -36,3 +36,7 @@ class HeaderComponent(BasePage):
             return int(self.driver.find_element(*self.CART_BADGE).text)
         except:
             return 0
+        
+    def wait_for_cart_count(self, n):
+        self.wait.until(lambda d: self.get_cart_badge_count() == n)
+
