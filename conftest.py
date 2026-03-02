@@ -83,7 +83,7 @@ def browser(request):
     driver.quit()
 
 @pytest.fixture
-def page_manager(browser):
+def page_manager(browser) -> PageManager:
     return PageManager(browser)
 
 @pytest.fixture
@@ -99,7 +99,7 @@ def mobile_env(request, browser):
     return {"user_agent": ua, "width": size.get("width"), "height": size.get("height")}
 
 @pytest.fixture
-def user_login(page_manager, browser, request):
+def user_login(page_manager, browser, request) -> PageManager:
     config = SauceConfig()
     user_type = request.config.getoption("--user-type")
     if user_type not in SauceConfig.USERS:

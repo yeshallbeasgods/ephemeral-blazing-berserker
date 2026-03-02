@@ -1,11 +1,12 @@
 import pytest
 from selenium.webdriver.support import expected_conditions as ec
+from pages.page_manager import PageManager
 
 class TestCartSmoke:
     
     @pytest.mark.smoke
     def test_add_single_item_to_cart(self, user_login, browser):
-        ebb = user_login
+        ebb: PageManager = user_login
         ebb.wait.until(ec.url_contains("inventory"))
         ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
         ebb.inventory_page.wait_for_cart_count(1)
@@ -15,7 +16,7 @@ class TestCartSmoke:
 
     @pytest.mark.smoke
     def test_add_multiple_items_to_cart(self, user_login, browser):
-        ebb = user_login
+        ebb: PageManager = user_login
         ebb.wait.until(ec.url_contains("inventory"))
         ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
         ebb.inventory_page.add_to_cart("Sauce Labs Bike Light")
@@ -28,7 +29,7 @@ class TestCartSmoke:
 
     @pytest.mark.smoke
     def test_remove_item_from_cart(self, user_login, browser):
-        ebb = user_login
+        ebb: PageManager = user_login
         ebb.wait.until(ec.url_contains("inventory"))
         ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
         ebb.inventory_page.add_to_cart("Sauce Labs Bike Light")

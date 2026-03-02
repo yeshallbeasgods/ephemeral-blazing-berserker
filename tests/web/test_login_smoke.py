@@ -1,18 +1,19 @@
 import pytest
 from selenium.webdriver.support import expected_conditions as ec
+from pages.page_manager import PageManager
 
 class TestLoginSmoke:
     
     @pytest.mark.smoke
     def test_successful_login(self, user_login, browser):
-        ebb = user_login
+        ebb: PageManager = user_login
         ebb.wait.until(ec.url_contains("inventory"))
         assert ebb.inventory_page.get_page_title() == "Products", "Inventory page title not found"
 
     @pytest.mark.smoke
     def test_locked_out_user(self, browser, page_manager):
         from config.settings import SauceConfig
-        ebb = page_manager
+        ebb: PageManager = page_manager
         browser.get(SauceConfig().base_url)
         ebb.login_page.login(
             username=SauceConfig.USERS["locked_out"]["username"],
@@ -24,7 +25,7 @@ class TestLoginSmoke:
     @pytest.mark.smoke
     def test_invalid_credentials(self, browser, page_manager):
         from config.settings import SauceConfig
-        ebb = page_manager
+        ebb: PageManager = page_manager
         browser.get(SauceConfig().base_url)
         ebb.login_page.login(username="bad_user", password="bad_pass")
         error = ebb.login_page.get_error_message()
