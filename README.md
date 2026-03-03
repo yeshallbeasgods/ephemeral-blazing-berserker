@@ -14,24 +14,32 @@ A Python Selenium test automation framework targeting the [Sauce Demo](https://w
 ```
 ephemeral-blazing-berserker/
 ├── config/
-│   └── settings.py             # Environment and user configuration
+│   └── settings.py                 # Environment and user configuration
 ├── pages/
-│   ├── base_page.py            # Shared page object base class
-│   ├── page_manager.py         # Central page object registry
+│   ├── base_page.py                # Shared page object base class
+│   ├── page_manager.py             # Central page object registry
 │   ├── components/
+│   │   └── header.py               # Shared header component (cart badge, nav, sort)
 │   ├── mobile/
+│   │   └── login_page_mobile.py
 │   └── web/
 │       ├── cart_page.py
 │       ├── inventory_page.py
 │       └── login_page.py
-├── tests/                      # Test suites (in progress)
-├── utils/                      # Reusable WebDriver utilities (in progress)
-├── reports/                    # Auto-generated HTML test reports
-├── conftest.py                 # Fixtures and browser configuration
-├── pytest.ini                  # pytest settings and markers
-├── requirements.txt            # Python dependencies
-├── .env                        # Local environment variables (not committed)
-└── .env.example                # Environment variable template
+├── tests/
+│   └── web/
+│       ├── test_cart_smoke.py
+│       └── test_login_smoke.py
+├── utils/
+│   ├── browser_utils.py            # Interaction helpers (clicks, scroll, keyboard, windows)
+│   ├── wait_utils.py               # Explicit wait strategies and polling helpers
+│   └── debug_utils.py             # Debugging and inspection utilities (see below)
+├── reports/                        # Auto-generated HTML test reports
+├── conftest.py                     # Fixtures and browser configuration
+├── pytest.ini                      # pytest settings and markers
+├── requirements.txt                # Python dependencies
+├── .env                            # Local environment variables (not committed)
+└── .env.example                    # Environment variable template
 ```
 
 ## Setup
@@ -125,11 +133,26 @@ reports/test-report.html
 | `mobile` | Tests running in mobile emulation mode |
 | `smoke` | Core user journey smoke tests |
 
+## Utility Library
+
+### BrowserUtils
+Interaction helpers for complex click scenarios, keyboard input, scrolling, and window/tab management. Includes `mobile_click` (animation-aware, SPA-safe), `robust_click` (retry with stale element handling), `javascript_click` (overlay bypass), and cross-platform keyboard utilities.
+
+### WaitUtils
+Explicit wait strategies beyond standard `WebDriverWait`. Includes fluent waits, element stability polling (position/size), network idle detection, animation completion checks, and API response polling.
+
+### DebugUtils
+Two categories of debugging support:
+
+**Human debugging** — tools for investigating failures locally: screenshots, page source capture, element detail printing, console log and network request inspection, and `capture_page_state` (screenshot + HTML in one call).
+
+**Agent/CI debugging** — tools designed for coding agents and CI pipelines diagnosing failures without a browser: `get_all_data_test_attributes` (maps available test hooks on the page), `get_interactive_elements` (all clickable targets), `get_element_locator_suggestions` (finds elements by partial text to help fix broken selectors), and `dump_page_state` (full JSON snapshot of URL, elements, and JS errors alongside a screenshot).
+
 ## Key Features
 
 - **Mobile emulation** via Chrome/Edge experimental options for accurate touch and JavaScript API behavior
-- **Reusable utility library** including stable element waits, mobile-optimized clicks, and cross-platform keyboard handling
-- **Page Object Model** with a central PageManager for scalable test organization
+- **Component-based page objects** with a shared `HeaderComponent` providing cart badge, navigation, and sort across all pages
+- **Page Object Model** with a central `PageManager` for scalable test organization
 - **Data-driven configuration** using nested dictionaries for user profiles, device profiles, and environments
 - **Cross-browser support** across Chrome, Edge, and Firefox
 
