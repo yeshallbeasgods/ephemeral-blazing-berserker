@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementClickInterceptedException, StaleElementReferenceException
 from utils.wait_utils import WaitUtils
 
 class BrowserUtils:
@@ -152,7 +152,7 @@ class BrowserUtils:
                 element = driver.find_element(*locator)
                 if element.is_displayed():
                     return element
-            except:
+            except (NoSuchElementException, StaleElementReferenceException):
                 pass
             driver.execute_script("window.scrollBy(0, 300);")
             time.sleep(scroll_pause)
