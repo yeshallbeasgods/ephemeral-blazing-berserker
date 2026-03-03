@@ -1,0 +1,6 @@
+[tool.ruff]
+exclude = ["venv", ".venv", "__pycache__"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]

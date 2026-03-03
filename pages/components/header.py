@@ -1,5 +1,7 @@
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.wait import WebDriverWait
 from pages.base_page import BasePage
 
 class HeaderComponent(BasePage):
@@ -34,9 +36,8 @@ class HeaderComponent(BasePage):
     def get_cart_badge_count(self):
         try:
             return int(self.driver.find_element(*self.CART_BADGE).text)
-        except:
+        except (NoSuchElementException, ValueError):
             return 0
         
-    def wait_for_cart_count(self, n):
-        self.wait.until(lambda d: self.get_cart_badge_count() == n)
-
+    def wait_for_cart_count(self, count, timeout=10):
+        WebDriverWait(self.driver, timeout).until(lambda d: self.get_cart_badge_count() == count)

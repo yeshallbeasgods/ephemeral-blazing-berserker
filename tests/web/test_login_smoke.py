@@ -3,7 +3,6 @@ from selenium.webdriver.support import expected_conditions as ec
 from pages.page_manager import PageManager
 
 class TestLoginSmoke:
-    
     @pytest.mark.smoke
     def test_successful_login(self, user_login, browser):
         ebb: PageManager = user_login
@@ -30,3 +29,4 @@ class TestLoginSmoke:
         ebb.login_page.login(username="bad_user", password="bad_pass")
         error = ebb.login_page.get_error_message()
         assert "Username and password do not match" in error, f"Unexpected error message: {error}"
+        

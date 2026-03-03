@@ -3,7 +3,6 @@ from selenium.webdriver.support import expected_conditions as ec
 from pages.page_manager import PageManager
 
 class TestCartSmoke:
-    
     @pytest.mark.smoke
     def test_add_single_item_to_cart(self, user_login, browser):
         ebb: PageManager = user_login
