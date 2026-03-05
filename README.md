@@ -1,5 +1,8 @@
 # Ephemeral Blazing Berserker
 
+[![Test](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml)
+[![Lint](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml)
+
 A Python Selenium test automation framework targeting the [Sauce Demo](https://www.saucedemo.com) application. Built to demonstrate professional QA engineering practices including the Page Object Model, reusable utility libraries, mobile emulation, and CI/CD integration.
 
 ## Tech Stack
@@ -158,11 +161,14 @@ Two categories of debugging support:
 
 ## CI/CD
 
-*GitHub Actions setup coming soon.*
+Two workflows run automatically on every push and pull request to `main`:
+
+- **Lint** — ruff checks for errors and code quality issues
+- **Test** — smoke suite runs against Chrome headless; test report and failure artifacts (screenshot + page state JSON) are uploaded on every run
 
 ## Roadmap
 
-- [ ] GitHub Actions on-push workflow
+- [x] GitHub Actions on-push workflow
 - [ ] API testing with requests/httpx
 - [ ] Expanded device profiles
 - [ ] Allure reporting
