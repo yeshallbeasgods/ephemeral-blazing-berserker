@@ -1,3 +1,4 @@
+import os
 import pytest
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
@@ -6,6 +7,7 @@ from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from pages.page_manager import PageManager
 from config.settings import SauceConfig
+from utils.debug_utils import DebugUtils
 
 def pytest_addoption(parser):
     parser.addoption("--custom-browser", action="store", default="chrome", help="Browser: chrome|edge|firefox")
@@ -32,6 +34,10 @@ def _build_driver(request):
     if name == "chrome":
         options = ChromeOptions()
         options.add_argument("--password-store=basic")
+        if os.environ.get("CI"):
+            options.add_argument("--headless=new")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
         if mobile_active:
             options.add_experimental_option("mobileEmulation", {
                 "deviceMetrics": {"width": width, "height": height, "pixelRatio": pixel_ratio},
@@ -61,6 +67,8 @@ def _build_driver(request):
 
     elif name == "firefox":
         options = FirefoxOptions()
+        if os.environ.get("CI"):
+            options.add_argument("--headless")
         if mobile_active and user_agent:
             options.set_preference("general.useragent.override", user_agent)
         driver = webdriver.Firefox(options=options)
@@ -126,4 +134,4 @@ def pytest_runtest_makereport(item, call):
     if rep.when == "call" and rep.failed:
         browser = item.funcargs.get("browser")
         if browser:
-            browser.save_screenshot(f"reports/screenshots/{item.name}.png")
+            DebugUtils.dump_page_state(browser, filename=item.name)

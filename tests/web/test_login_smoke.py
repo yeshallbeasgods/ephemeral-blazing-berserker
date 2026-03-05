@@ -1,12 +1,12 @@
 import pytest
-from selenium.webdriver.support import expected_conditions as ec
+from utils.wait_utils import WaitUtils as wu
 from pages.page_manager import PageManager
 
 class TestLoginSmoke:
     @pytest.mark.smoke
     def test_successful_login(self, user_login, browser):
         ebb: PageManager = user_login
-        ebb.wait.until(ec.url_contains("inventory"))
+        wu.wait_for_url_to_contain(browser, "inventory")
         assert ebb.inventory_page.get_page_title() == "Products", "Inventory page title not found"
 
     @pytest.mark.smoke

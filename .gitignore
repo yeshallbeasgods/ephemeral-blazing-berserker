@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Test reports and artifacts
+reports/*.html
+reports/screenshots/*.png
+reports/screenshots/*.json
+!reports/.gitkeep
+!reports/screenshots/.gitkeep
