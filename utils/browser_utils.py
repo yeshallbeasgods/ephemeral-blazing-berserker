@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, ElementClickInterceptedException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException, TimeoutException, ElementClickInterceptedException, StaleElementReferenceException, WebDriverException
 from utils.wait_utils import WaitUtils
 
 class BrowserUtils:
@@ -46,15 +46,56 @@ class BrowserUtils:
             time.sleep(1)  # Small delay to avoid tight looping
         raise Exception(f"No window found with a URL containing '{expected_url_fragment}' within {timeout} seconds.")
 
-    @staticmethod
-    def switch_to_remaining_window(driver, timeout=10):
-        end_time = time.time() + timeout
-        while time.time() < end_time:
-            if len(driver.window_handles) == 1:
-                driver.switch_to.window(driver.window_handles[0])
-                return
-            time.sleep(0.5)  # Small delay to avoid tight looping
-        raise Exception("The test timed out waiting for all windows except one to close.")
+@staticmethod
+def switch_to_new_window(driver, known_handles, timeout=15):
+    # Switches to a window that wasn't in known_handles.
+    end_time = time.time() + timeout
+    while time.time() < end_time:
+        new = [h for h in driver.window_handles if h not in known_handles]
+        if new:
+            driver.switch_to.window(new[0])
+            return new[0]
+        time.sleep(0.5)
+    raise Exception("No new window appeared within timeout")
+
+@staticmethod
+def switch_to_remaining_window(driver, timeout=10):
+    end_time = time.time() + timeout
+    while time.time() < end_time:
+        if len(driver.window_handles) == 1:
+            driver.switch_to.window(driver.window_handles[0])
+            return
+        time.sleep(0.5)
+    handles = driver.window_handles
+    titles = []
+    for h in handles:
+        try:
+            driver.switch_to.window(h)
+            titles.append(driver.title)
+        except (NoSuchWindowException, WebDriverException):
+            titles.append("(unreachable)")
+    raise Exception(
+        f"Timed out waiting for windows to close. "
+        f"Still open ({len(handles)}): {titles}"
+    )
+
+@staticmethod
+def close_all_except_main_window(driver, main_handle, timeout=10):
+    # Closes any extra windows and returns focus to main window. Useful for headless/remote runs.
+    end_time = time.time() + timeout
+    while time.time() < end_time:
+        extra = [h for h in driver.window_handles if h != main_handle]
+        if not extra:
+            driver.switch_to.window(main_handle)
+            return
+        for h in extra:
+            try:
+                driver.switch_to.window(h)
+                driver.close()
+            except (NoSuchWindowException, WebDriverException):
+                pass
+        time.sleep(0.5)
+    driver.switch_to.window(main_handle)
 
     @staticmethod
     def javascript_click(driver, element):

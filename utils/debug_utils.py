@@ -1,5 +1,7 @@
+import json
 from datetime import datetime
 from typing import List, Dict
+from selenium.common.exceptions import WebDriverException
 
 class DebugUtils:
     @staticmethod
@@ -133,18 +135,22 @@ class DebugUtils:
     @staticmethod
     def dump_page_state(driver, filename="page_state", path="reports/screenshots"):
         # Captures everything useful about current page state in one call
-        # Designed for agent consumption when debugging failures
+        # Designed for agent consumption when debugging failures in CI
+        # Returns None if browser is unavailable (e.g. already closed)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        state = {
-            "url": driver.current_url,
-            "title": driver.title,
-            "data_test_elements": DebugUtils.get_all_data_test_attributes(driver),
-            "interactive_elements": DebugUtils.get_interactive_elements(driver),
-            "javascript_errors": DebugUtils.check_javascript_errors(driver)
-        }
-        import json
-        filepath = f"{path}/{filename}_{timestamp}.json"
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(state, f, indent=2)
-        driver.save_screenshot(f"{path}/{filename}_{timestamp}.png")
-        return state
+        try:
+            state = {
+                "url": driver.current_url,
+                "title": driver.title,
+                "data_test_elements": DebugUtils.get_all_data_test_attributes(driver),
+                "interactive_elements": DebugUtils.get_interactive_elements(driver),
+                "javascript_errors": DebugUtils.check_javascript_errors(driver)
+            }
+            filepath = f"{path}/{filename}_{timestamp}.json"
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(state, f, indent=2)
+            driver.save_screenshot(f"{path}/{filename}_{timestamp}.png")
+            return state
+        except WebDriverException:
+            # Browser window may have already been closed by the time this runs
+            return None

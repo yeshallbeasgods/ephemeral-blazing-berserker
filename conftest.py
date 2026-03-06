@@ -1,5 +1,6 @@
 import os
 import pytest
+import warnings
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.options import Options as ChromeOptions
@@ -8,6 +9,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from pages.page_manager import PageManager
 from config.settings import SauceConfig
 from utils.debug_utils import DebugUtils
+from utils.wait_utils import WaitUtils
 
 def pytest_addoption(parser):
     parser.addoption("--custom-browser", action="store", default="chrome", help="Browser: chrome|edge|firefox")
@@ -127,6 +129,20 @@ def user_login(page_manager, browser, request) -> PageManager:
         )
     return page_manager
 
+@pytest.fixture
+def mobile_login(page_manager, browser, request):
+    from pages.mobile.mobile_page_manager import MobilePageManager
+    config = SauceConfig()
+    credentials = SauceConfig.USERS["standard"]
+    browser.get(config.base_url)
+    mobile_pm = MobilePageManager(browser)
+    mobile_pm.login_page.mobile_login(
+        username=credentials["username"],
+        password=credentials["password"]
+    )
+    WaitUtils.wait_for_url_to_contain(browser, "inventory")
+    return mobile_pm
+
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
@@ -134,4 +150,7 @@ def pytest_runtest_makereport(item, call):
     if rep.when == "call" and rep.failed:
         browser = item.funcargs.get("browser")
         if browser:
-            DebugUtils.dump_page_state(browser, filename=item.name)
+            try:
+                DebugUtils.dump_page_state(browser, filename=item.name, path="reports/screenshots")
+            except Exception as exc:
+                warnings.warn(f"dump_page_state failed for {item.name}: {exc}")
