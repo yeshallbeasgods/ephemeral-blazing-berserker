@@ -9,6 +9,9 @@ from selenium.webdriver.support import expected_conditions as ec
 from utils.debug_utils import DebugUtils
 
 class WaitUtils:
+
+    # --- Element Waits ---
+
     @staticmethod
     def wait_for_element(driver, element, condition, timeout=10):
         # Common expected conditions include ec.visibility_of, ec.element_to_be_clickable, ec.invisibility_of_element
@@ -34,6 +37,8 @@ class WaitUtils:
         # Use if wait for element to be invisible doesn't work
         WebDriverWait(driver, timeout).until_not(ec.visibility_of(element))
 
+    # --- Navigation & Page Waits ---
+
     @staticmethod
     def wait_for_url_to_contain(driver, string, timeout=10):
         WebDriverWait(driver, timeout).until(ec.url_contains(string))
@@ -53,6 +58,8 @@ class WaitUtils:
         except TimeoutException:
             raise TimeoutException(f"A new window did not appear. {window_count} window(s) were expected.")
 
+    # --- Content Waits ---
+
     @staticmethod
     def wait_for_text_in_dom(driver, text, timeout=5):
         # this is a bad test and should only be used if element is completely unavailable
@@ -60,6 +67,8 @@ class WaitUtils:
             lambda d: text in d.page_source,
             f"Your string '{text}' was not found in the DOM within {timeout} seconds."
         )
+
+    # --- Network & Performance ---
 
     @staticmethod
     def wait_for_api_response(url, headers=None, timeout=30, interval=1):
@@ -125,6 +134,8 @@ class WaitUtils:
                 "return document.getAnimations().every(a => a.playState === 'finished');"
             )
         )
+
+    # --- Interaction Retry & Gestures ---
 
     @staticmethod
     def retry_interaction(element, action, timeout=10, interval=0.5):

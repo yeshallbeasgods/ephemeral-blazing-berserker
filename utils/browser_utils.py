@@ -10,6 +10,9 @@ from selenium.common.exceptions import NoSuchElementException, NoSuchWindowExcep
 from utils.wait_utils import WaitUtils
 
 class BrowserUtils:
+
+    # --- Keyboard & Text Input ---
+
     @staticmethod
     def clear_and_send_keys(driver, element, text, select_all=False, delay=0.1):
         if select_all:
@@ -33,6 +36,8 @@ class BrowserUtils:
         if finish_delay > 0:
             time.sleep(finish_delay)
 
+    # --- Window Management ---
+    
     @staticmethod
     def switch_to_window_by_url(driver, expected_url_fragment, timeout=10, initial_delay=0):
         if initial_delay > 0:
@@ -46,56 +51,83 @@ class BrowserUtils:
             time.sleep(1)  # Small delay to avoid tight looping
         raise Exception(f"No window found with a URL containing '{expected_url_fragment}' within {timeout} seconds.")
 
-@staticmethod
-def switch_to_new_window(driver, known_handles, timeout=15):
-    # Switches to a window that wasn't in known_handles.
-    end_time = time.time() + timeout
-    while time.time() < end_time:
-        new = [h for h in driver.window_handles if h not in known_handles]
-        if new:
-            driver.switch_to.window(new[0])
-            return new[0]
-        time.sleep(0.5)
-    raise Exception("No new window appeared within timeout")
+    @staticmethod
+    def switch_to_new_window(driver, known_handles, timeout=15):
+        # Switches to a window that wasn't in known_handles.
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            new = [h for h in driver.window_handles if h not in known_handles]
+            if new:
+                driver.switch_to.window(new[0])
+                return new[0]
+            time.sleep(0.5)
+        raise Exception("No new window appeared within timeout")
 
-@staticmethod
-def switch_to_remaining_window(driver, timeout=10):
-    end_time = time.time() + timeout
-    while time.time() < end_time:
-        if len(driver.window_handles) == 1:
-            driver.switch_to.window(driver.window_handles[0])
-            return
-        time.sleep(0.5)
-    handles = driver.window_handles
-    titles = []
-    for h in handles:
-        try:
-            driver.switch_to.window(h)
-            titles.append(driver.title)
-        except (NoSuchWindowException, WebDriverException):
-            titles.append("(unreachable)")
-    raise Exception(
-        f"Timed out waiting for windows to close. "
-        f"Still open ({len(handles)}): {titles}"
-    )
-
-@staticmethod
-def close_all_except_main_window(driver, main_handle, timeout=10):
-    # Closes any extra windows and returns focus to main window. Useful for headless/remote runs.
-    end_time = time.time() + timeout
-    while time.time() < end_time:
-        extra = [h for h in driver.window_handles if h != main_handle]
-        if not extra:
-            driver.switch_to.window(main_handle)
-            return
-        for h in extra:
+    @staticmethod
+    def switch_to_remaining_window(driver, timeout=10):
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            if len(driver.window_handles) == 1:
+                driver.switch_to.window(driver.window_handles[0])
+                return
+            time.sleep(0.5)
+        handles = driver.window_handles
+        titles = []
+        for h in handles:
             try:
                 driver.switch_to.window(h)
-                driver.close()
+                titles.append(driver.title)
             except (NoSuchWindowException, WebDriverException):
-                pass
-        time.sleep(0.5)
-    driver.switch_to.window(main_handle)
+                titles.append("(unreachable)")
+        raise Exception(
+            f"Timed out waiting for windows to close. "
+            f"Still open ({len(handles)}): {titles}"
+        )
+
+    @staticmethod
+    def close_all_except_main_window(driver, main_handle, timeout=10):
+        # Closes any extra windows and returns focus to main window. Useful for headless/remote runs.
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            extra = [h for h in driver.window_handles if h != main_handle]
+            if not extra:
+                driver.switch_to.window(main_handle)
+                return
+            for h in extra:
+                try:
+                    driver.switch_to.window(h)
+                    driver.close()
+                except (NoSuchWindowException, WebDriverException):
+                    pass
+            time.sleep(0.5)
+        driver.switch_to.window(main_handle)
+
+    @staticmethod
+    def close_window_by_title(driver, title, return_handle=None):
+        # Closes a window matching the given title, then returns to return_handle (or original).
+        # If no matching window is found, continues silently.
+        original_handle = driver.current_window_handle
+        for handle in driver.window_handles:
+            try:
+                driver.switch_to.window(handle)
+                if driver.title == title:
+                    driver.close()
+                    target = return_handle if return_handle else original_handle
+                    try:
+                        driver.switch_to.window(target)
+                    except (NoSuchWindowException, WebDriverException):
+                        if driver.window_handles:
+                            driver.switch_to.window(driver.window_handles[0])
+                    return
+            except (NoSuchWindowException, WebDriverException):
+                continue
+        try:
+            driver.switch_to.window(original_handle)
+        except (NoSuchWindowException, WebDriverException):
+            if driver.window_handles:
+                driver.switch_to.window(driver.window_handles[0])
+
+    # --- Click & Mouse Interactions ---
 
     @staticmethod
     def javascript_click(driver, element):
@@ -173,6 +205,8 @@ def close_all_except_main_window(driver, main_handle, timeout=10):
         if duration > 0:
             time.sleep(duration)
 
+    # --- Scroll ---
+
     @staticmethod
     def scroll_to_element(driver, element):
         driver.execute_script("arguments[0].scrollIntoView(true);", element)
@@ -198,6 +232,8 @@ def close_all_except_main_window(driver, main_handle, timeout=10):
             driver.execute_script("window.scrollBy(0, 300);")
             time.sleep(scroll_pause)
         raise TimeoutException(f"{locator} not found after scrolling for {timeout}s")
+
+    # --- DOM Manipulation ---
 
     @staticmethod
     def highlight_element(driver, element):

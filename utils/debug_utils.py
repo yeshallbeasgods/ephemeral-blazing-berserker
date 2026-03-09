@@ -4,6 +4,9 @@ from typing import List, Dict
 from selenium.common.exceptions import WebDriverException
 
 class DebugUtils:
+
+    # --- Logging & Inspection ---
+
     @staticmethod
     def set_and_print_variable(name, value):
         print(f"{name}: {value}")
@@ -44,6 +47,8 @@ class DebugUtils:
         for log in logs:
             print(log)
 
+    # --- Capture & Artifacts ---
+
     @staticmethod
     def take_screenshot(driver, filename="screenshot", path="reports/screenshots"):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -63,7 +68,10 @@ class DebugUtils:
         with open(f"{path}/{filename}_{timestamp}.html", "w", encoding="utf-8") as f:
             f.write(driver.page_source)
 
-    # Utilities for helping coding agents debug failing CI tests
+    # --- Agent & CI Debugging ---
+
+    # --- DOM Inspection ---
+
     @staticmethod
     def get_page_html(driver) -> str:
         # Returns full page source - useful for agents to inspect current DOM state
@@ -131,6 +139,8 @@ class DebugUtils:
             }}));
         """)
         return results
+
+    # --- State Snapshot ---
 
     @staticmethod
     def dump_page_state(driver, filename="page_state", path="reports/screenshots"):
