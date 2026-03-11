@@ -1,3 +1,4 @@
+import json
 import os
 import pytest
 import warnings
@@ -151,6 +152,8 @@ def pytest_runtest_makereport(item, call):
         browser = item.funcargs.get("browser")
         if browser:
             try:
-                DebugUtils.dump_page_state(browser, filename=item.name, path="reports/screenshots")
+                state = DebugUtils.dump_page_state(browser, filename=item.name, path="reports/screenshots")
+                if os.environ.get("CI") and state:
+                    print(f"\n--- Page State on Failure ({item.name}) ---\n{json.dumps(state, indent=2)}")
             except Exception as exc:
                 warnings.warn(f"dump_page_state failed for {item.name}: {exc}")

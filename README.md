@@ -12,6 +12,7 @@ A Python Selenium test automation framework targeting the [Sauce Demo](https://w
 - pytest
 - webdriver-manager
 - pytest-html
+- ruff
 
 ## Project Structure
 ```
@@ -24,12 +25,15 @@ ephemeral-blazing-berserker/
 │   ├── components/
 │   │   └── header.py               # Shared header component (cart badge, nav, sort)
 │   ├── mobile/
-│   │   └── login_page_mobile.py
+│   │   ├── inventory_page_mobile.py
+│   │   └── mobile_page_manager.py
 │   └── web/
 │       ├── cart_page.py
 │       ├── inventory_page.py
 │       └── login_page.py
 ├── tests/
+│   ├── mobile/
+│   │   └── test_cart_mobile.py
 │   └── web/
 │       ├── test_cart_smoke.py
 │       └── test_login_smoke.py
@@ -164,11 +168,21 @@ Two categories of debugging support:
 Two workflows run automatically on every push and pull request to `main`:
 
 - **Lint** — ruff checks for errors and code quality issues
-- **Test** — smoke suite runs against Chrome headless; test report and failure artifacts (screenshot + page state JSON) are uploaded on every run
+- **Test** — smoke suite runs against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 7 days
 
 ## Roadmap
 
-- [x] GitHub Actions on-push workflow
-- [ ] API testing with requests/httpx
-- [ ] Expanded device profiles
-- [ ] Allure reporting
+**Complete**
+- [x] Web smoke tests — login and cart flows
+- [x] Utility library — BrowserUtils, WaitUtils, DebugUtils
+- [x] Mobile emulation with MobilePageManager and mobile page object layer
+- [x] GitHub Actions CI — lint and test workflows on push and PR
+- [x] Failure artifacts — screenshot and page state JSON captured automatically on test failure
+
+**In progress**
+- [ ] Mobile smoke tests — login and cart flows via mobile_login fixture and MobileHeaderComponent
+
+**Upcoming**
+- [ ] API tests — OpenWeather current weather endpoint using requests; parametrized cities, schema validation, environment-managed API key
+- [ ] Data-driven tests — SQLite fixtures for product test data, replacing hardcoded strings in cart assertions
+- [ ] Allure reporting — rich test reports with screenshot attachments alongside existing pytest-html

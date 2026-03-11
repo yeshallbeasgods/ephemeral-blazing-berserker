@@ -9,8 +9,7 @@ Guidance for AI agents working on this repository.
 A Python Selenium test automation framework targeting [Sauce Demo](https://www.saucedemo.com). Demonstrates professional QA engineering practices: Page Object Model, shared component inheritance, reusable utility libraries, mobile emulation, and CI/CD via GitHub Actions.
 
 **In progress:**
-- `pages/mobile/mobile_page_manager.py` — `MobilePageManager` subclass needed (referenced in `conftest.py`)
-- `pages/mobile/login_page_mobile.py` — mobile login page object needed
+- `pages/mobile/login_page_mobile.py` — mobile login page object still needed
 - Mobile test coverage is being built out under `tests/mobile/`
 
 ---
@@ -72,15 +71,92 @@ conftest.py                 # Fixtures: browser, page_manager, user_login, mobil
 
 ---
 
+## Naming Conventions
+
+### Locator constants
+
+Locators are defined as **class-level `UPPER_SNAKE_CASE` tuples** on the page object, never inline inside methods or tests:
+
+```python
+# Correct — class-level constant
+class LoginPage(BasePage):
+    USERNAME_INPUT = (By.CSS_SELECTOR, "[data-test='username']")
+
+    def enter_username(self, value):
+        self.driver.find_element(*self.USERNAME_INPUT).send_keys(value)
+```
+
+Use `data-test` attributes as the preferred selector strategy. Fall back to `id`, then CSS class only when `data-test` is absent on the target element. Avoid XPath for static locators.
+
+### Dynamic locators
+
+When the selector depends on runtime data (e.g. a product name), define a `@staticmethod` that returns the tuple:
+
+```python
+@staticmethod
+def add_to_cart_locator(item_name: str) -> tuple:
+    slug = item_name.lower().replace(" ", "-")
+    return By.CSS_SELECTOR, f"[data-test='add-to-cart-{slug}']"
+```
+
+Call it with `self.add_to_cart_locator(name)` inside the page object method — never generate the locator inside a test.
+
+### Import aliases
+
+| Import | Alias | Usage |
+|---|---|---|
+| `from utils.wait_utils import WaitUtils` | `as wu` | `wu.wait_for_url_to_contain(browser, "fragment")` |
+
+`WaitUtils` is imported `as wu` throughout tests and page objects. `BrowserUtils` is imported unaliased (`BrowserUtils.mobile_click(...)`).
+
+### Test variable name for PageManager
+
+Inside test methods, the `PageManager` instance received from `user_login` or `mobile_login` is assigned to `ebb`:
+
+```python
+def test_example(self, user_login, browser):
+    ebb: PageManager = user_login
+    ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
+```
+
+The type annotation (`ebb: PageManager`) is required so Pylance resolves page object attributes.
+
+---
+
 ## Coding Standards
 
-- **Page objects** must inherit from `BasePage` (directly or via `HeaderComponent`)
+- **Page objects** must inherit from `BasePage` (directly or via `HeaderComponent`). Use `HeaderComponent` for any page that has the shared navigation bar, cart icon, or sort control (e.g. `InventoryPage`, `CartPage`). Use `BasePage` directly for standalone pages that do not share that chrome (e.g. `LoginPage`).
 - **Mobile page objects** inherit from their web counterpart and override only the methods that differ — use `BrowserUtils.mobile_click` for interactions
 - **`MobilePageManager`** subclasses `PageManager` and swaps in mobile page objects; do not mutate `PageManager` attributes after construction
 - **Waits**: use `WaitUtils` methods or page-level wait methods (e.g. `wait_for_cart_count`) — do not use raw `ebb.wait.until(ec.url_contains(...))` in tests; use `wu.wait_for_url_to_contain(browser, "fragment")` instead
 - **Exceptions**: never use bare `except:` or broad `except Exception:` — catch specific exception types (e.g. `NoSuchElementException`, `ValueError`)
 - **Type annotations**: fixtures in `conftest.py` must have `-> PageManager` (or appropriate) return type annotations so Pylance resolves types in tests
 - **Imports**: do not leave unused imports; ruff enforces this on every push
+
+---
+
+## What Not To Do
+
+- **No SeleniumBase.** This project uses plain Selenium + pytest. Do not import or reference `seleniumbase`, `SB`, `BaseCase`, or any SeleniumBase primitives.
+- **No `element.parent` to get the driver.** Always use `self.driver` (inherited from `BasePage`) inside page objects. `WebElement.parent` is an internal Selenium detail and must not be relied upon.
+- **No inline locators in tests.** Tests must not contain `By.CSS_SELECTOR`, `By.ID`, or any selector string. All locators belong as constants or `@staticmethod` methods on the relevant page object class.
+- **No raw `WebDriverWait` in tests.** Use `wu.wait_for_url_to_contain(browser, ...)` or page-level wait methods (e.g. `wait_for_cart_count`). Raw `WebDriverWait(driver, 10).until(...)` calls belong inside page objects or utilities only.
+
+---
+
+## Fixtures
+
+All fixtures are defined in `conftest.py` and are function-scoped unless noted.
+
+| Fixture | Yields | Use when |
+|---|---|---|
+| `browser` | `WebDriver` | Low-level driver access; rarely used directly in tests |
+| `page_manager` | `PageManager` | You need a `PageManager` without a pre-logged-in session |
+| `user_login` | `PageManager` (logged in) | Desktop tests — yields a `PageManager` already past the login screen |
+| `mobile_login` | `MobilePageManager` (logged in) | Mobile tests — same as `user_login` but via `MobilePageManager` |
+| `mobile_env` | `dict` (viewport info) | Validates mobile UA is applied; consumed internally by `mobile_login` |
+
+The `--user-type` CLI option (standard / locked_out / problem) controls which Sauce Demo account `user_login` and `mobile_login` authenticate with. Default is `standard`.
 
 ---
 
@@ -91,29 +167,35 @@ conftest.py                 # Fixtures: browser, page_manager, user_login, mobil
 - Tests should not contain raw `WebDriverWait` calls — use `WaitUtils` or page-level methods
 - Assertions on DOM state (badge counts, page titles) must be preceded by an appropriate wait
 - The `browser` fixture is function-scoped — each test gets a clean browser instance
+- CI runs `pytest -m smoke` and generates two report artifacts (gitignored, never committed):
+  - `reports/test-report.html` — pytest-html full run report
+  - `reports/screenshots/{test_name}_{timestamp}.png/.json` — auto-captured on any test failure
 
 ---
 
 ## Debugging Failing Tests
 
-`DebugUtils` in `utils/debug_utils.py` includes a suite of tools built specifically for agent use. Follow this protocol when investigating a failure:
+`DebugUtils` in `utils/debug_utils.py` includes a suite of tools built specifically for agent use. The debugging workflow differs depending on whether you are working locally or investigating a CI failure.
 
-### Step 1 — Check automatic artifacts first
+---
 
-On any test failure, `conftest.py` automatically calls `dump_page_state`, which writes two files to `reports/screenshots/`:
+### Local Debugging
 
-- `{test_name}_{timestamp}.png` — screenshot of the browser at time of failure
-- `{test_name}_{timestamp}.json` — full page state snapshot including:
-  - Current URL and page title
-  - All elements with `data-test` attributes (the locator hooks used throughout this codebase)
-  - All interactive elements (buttons, inputs, links)
-  - Any JavaScript console errors
+When working locally, agents can run tests directly and read output and artifacts without any extra steps.
 
-Read the JSON artifact before doing anything else. It often contains enough information to identify the problem without running the tests again.
+**Run a specific failing test:**
+```bash
+pytest tests/web/test_cart_smoke.py::TestCartSmoke::test_add_single_item_to_cart -v
+pytest tests/mobile/test_cart_mobile.py::TestCartMobile::test_add_single_item_to_cart -v
+```
 
-### Step 2 — Add targeted debug calls if needed
+**On failure, two files are automatically written to `reports/screenshots/`:**
+- `{test_name}_{timestamp}.png` — screenshot at time of failure
+- `{test_name}_{timestamp}.json` — full page state including URL, title, all `data-test` elements, interactive elements, and JS errors
 
-If the artifact isn't sufficient, temporarily add calls inside the failing test or page object method, re-run the specific test, then remove them before committing.
+Read the JSON file first. It usually contains enough to identify the problem without running again.
+
+**If the artifact isn't sufficient, temporarily add debug calls inside the failing test or page object method, re-run, then remove before committing:**
 
 ```python
 from utils.debug_utils import DebugUtils
@@ -134,15 +216,32 @@ print(DebugUtils.get_interactive_elements(driver))
 print(DebugUtils.get_element_locator_suggestions(driver, "Backpack"))
 ```
 
-### Step 3 — Run the isolated test
+Debug calls must not be left in committed code.
+
+---
+
+### CI Debugging (GitHub Actions)
+
+When a test fails in CI, the full page state JSON is printed directly to the job logs — no artifact download needed. Fetch the logs with:
 
 ```bash
-pytest tests/web/test_cart_smoke.py::TestCartSmoke::test_add_single_item_to_cart -v
+# List recent runs
+gh run list --limit 5
+
+# View logs for a specific run
+gh run view <run-id> --log
+
+# Filter to just the failed test output
+gh run view <run-id> --log | grep -A 100 "Page State on Failure"
 ```
 
-### Step 4 — Remove debug calls before committing
+The log output will contain the same JSON that would be written locally to `reports/screenshots/` — URL, page title, all `data-test` elements, interactive elements, and JS errors.
 
-Debug calls must not be left in committed code. Once the fix is confirmed, remove all temporary `DebugUtils` calls.
+Artifacts (screenshot + JSON file) are also uploaded and retained for 7 days. Download them if you need the screenshot:
+
+```bash
+gh run download <run-id> --dir reports/
+```
 
 ---
 
