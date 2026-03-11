@@ -2,6 +2,7 @@
 
 [![Test](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml)
 [![Lint](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A Python Selenium test automation framework targeting the [Sauce Demo](https://www.saucedemo.com) application. Built to demonstrate professional QA engineering practices including the Page Object Model, reusable utility libraries, mobile emulation, and CI/CD integration.
 
@@ -169,6 +170,10 @@ Two workflows run automatically on every push and pull request to `main`:
 
 - **Lint** — ruff checks for errors and code quality issues
 - **Test** — smoke suite runs against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 7 days
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
 
 ## Roadmap
 
