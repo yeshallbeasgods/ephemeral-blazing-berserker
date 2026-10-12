@@ -1,3 +1,4 @@
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from pages.components.header import HeaderComponent
@@ -26,6 +27,11 @@ class CartPage(HeaderComponent):
         self.driver.find_element(*locator).click()
 
     def get_cart_item_names(self):
+        for _ in range(2):
+            try:
+                return [el.text for el in self.driver.find_elements(*self.ITEM_NAMES)]
+            except StaleElementReferenceException:
+                pass
         return [el.text for el in self.driver.find_elements(*self.ITEM_NAMES)]
 
     def get_cart_item_count(self):

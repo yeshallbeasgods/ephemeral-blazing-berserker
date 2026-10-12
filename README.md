@@ -108,7 +108,7 @@ pytest -m "not mobile"
 
 ### Run smoke tests only
 ```bash
-pytest -m smoke
+pytest -m "smoke and not mobile"   # what CI runs
 ```
 
 ### Run with a specific device profile
@@ -170,7 +170,7 @@ Two categories of debugging support:
 Two workflows run automatically on every push and pull request to `main`:
 
 - **Lint** — ruff checks for errors and code quality issues
-- **Test** — smoke suite runs against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 7 days
+- **Test** — web smoke suite (mobile tests excluded until the mobile suite is stable) runs against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 7 days
 
 ## License
 
