@@ -1,4 +1,5 @@
 # Selenium + Python (pytest) Test Automation
+Web and mobile-emulation smoke tests (Sauce Demo), a custom utility library, and GitHub Actions CI. Work in progress.
 
 [![Test](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml)
 [![Lint](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml)
