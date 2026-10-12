@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: "weekly"
     groups:
+      python-minor-patch:
+        update-types: ["minor", "patch"]
       dependencies:
         patterns:
           - "*"
