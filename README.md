@@ -1,4 +1,4 @@
-# Ephemeral Blazing Berserker
+# Selenium + Python (pytest) Test Automation
 
 [![Test](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml)
 [![Lint](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml)
