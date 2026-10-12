@@ -9,7 +9,7 @@ A Python Selenium test automation framework targeting the [Sauce Demo](https://w
 
 ## Tech Stack
 
-- Python 3.x
+- Python 3.13
 - Selenium WebDriver
 - pytest
 - webdriver-manager
@@ -54,7 +54,7 @@ ephemeral-blazing-berserker/
 ## Setup
 
 ### Prerequisites
-- Python 3.x
+- Python 3.13
 - Google Chrome, Microsoft Edge, or Firefox
 
 ### Installation
