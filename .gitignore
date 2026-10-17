@@ -26,12 +26,16 @@ ENV/
 
 # Test reports and artifacts
 reports/*.html
+reports/junit.xml
 reports/screenshots/*.png
 reports/screenshots/*.json
 !reports/.gitkeep
 !reports/screenshots/.gitkeep
 
 .claude/settings.local.json
+
+# Built Pages site (CI output)
+publish/
 
 # Editors
 .vscode/

@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Nightly at 11:41 UTC (6:41 am CDT, 5:41 am CST). Catches drift in Sauce Demo. Cron ignores daylight
+    # saving. The odd minute avoids the top of the hour, when scheduled runs are most often delayed, and
+    # staggers this run from the Playwright repo's 11:17 run.
+    - cron: "41 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to a PR cancels the older run. Pushes to main and nightly runs always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Runners are pinned instead of ubuntu-latest, which moves to Ubuntu 26 on 2026-10-19. Move to a newer
+# image on purpose, after checking that the browser and driver still work, not by surprise.
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: ruff check .
+      # Tests for scripts/build_status.py. Kept out of tests/ (the Selenium suite), so they run explicitly
+      # and without the HTML report that pytest.ini adds to every run.
+      - name: Test the status script
+        run: pytest scripts -o addopts=""
+
+  smoke:
+    name: Smoke tests
+    needs: lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run smoke tests
+        run: pytest -m "smoke and not mobile" --junitxml=reports/junit.xml
+      - name: Upload test artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-artifacts
+          retention-days: 14
+          path: |
+            reports/junit.xml
+            reports/test-report.html
+            reports/screenshots/
+
+  # Builds the site (HTML report and status.json). Read-only: it gets no write access.
+  report:
+    name: Report
+    needs: [lint, smoke]
+    # Runs after failed test jobs too, so a red run still produces a report. Cancelled runs are skipped.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      # Missing when lint failed and smoke never ran. build_status.py then reports zero tests.
+      - name: Download test artifacts
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: test-artifacts
+          path: reports
+      - name: Build the site
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          SMOKE_RESULT: ${{ needs.smoke.result }}
+        run: |
+          mkdir -p publish/report
+          cp -r site/. publish/
+          if [ -f reports/test-report.html ]; then cp reports/test-report.html publish/report/index.html; fi
+          python scripts/build_status.py reports/junit.xml publish/status.json
+      - name: Upload the site
+        uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: publish
+          retention-days: 14
+
+  # Pushes the built site to the gh-pages branch. The only job with write access, and it runs no project code.
+  publish:
+    name: Publish to GitHub Pages
+    needs: report
+    # Only main and the nightly schedule publish. Pull requests and manual runs on other branches just build.
+    if: ${{ !cancelled() && needs.report.result == 'success' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    # Serializes publishing so a push and the nightly run can never write gh-pages at the same time.
+    concurrency:
+      group: pages-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: publish
+      # keep_files leaves earlier files in place and overwrites the ones that changed.
+      # Never add force_orphan: the repo ruleset blocks force pushes to gh-pages.
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./publish
+          keep_files: true

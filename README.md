@@ -1,8 +1,7 @@
 # Selenium + Python (pytest) Test Automation
 Web and mobile-emulation smoke tests (Sauce Demo), a custom utility library, and GitHub Actions CI. Work in progress.
 
-[![Test](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/test.yml)
-[![Lint](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/lint.yml)
+[![CI](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/ci.yml/badge.svg)](https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A Python Selenium test automation framework targeting the [Sauce Demo](https://www.saucedemo.com) application. Built to demonstrate professional QA engineering practices including the Page Object Model, reusable utility libraries, mobile emulation, and CI/CD integration.
@@ -19,6 +18,9 @@ A Python Selenium test automation framework targeting the [Sauce Demo](https://w
 ## Project Structure
 ```
 ephemeral-blazing-berserker/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                  # Lint, smoke tests, report, and Pages publish
 ├── config/
 │   └── settings.py                 # Environment and user configuration
 ├── pages/
@@ -33,6 +35,11 @@ ephemeral-blazing-berserker/
 │       ├── cart_page.py
 │       ├── inventory_page.py
 │       └── login_page.py
+├── scripts/
+│   ├── build_status.py             # Builds status.json from the pytest junit XML
+│   └── test_build_status.py        # Tests for build_status.py (run separately, see CI/CD)
+├── site/
+│   └── index.html                  # Pages root; redirects to report/
 ├── tests/
 │   ├── mobile/
 │   │   └── test_cart_mobile.py
@@ -167,10 +174,23 @@ Two categories of debugging support:
 
 ## CI/CD
 
-Two workflows run automatically on every push and pull request to `main`:
+One workflow, `ci.yml`, runs on every push and pull request to `main`, nightly at 11:41 UTC, and on demand:
 
-- **Lint** — ruff checks for errors and code quality issues
-- **Test** — web smoke suite (mobile tests excluded until the mobile suite is stable) runs against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 7 days
+- **Lint** — ruff, plus the tests for `scripts/build_status.py`
+- **Smoke tests** — web smoke suite (mobile tests excluded until the mobile suite is stable) against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 14 days
+- **Report** — builds the site from the test results, even when tests fail
+- **Publish** — pushes the site to GitHub Pages (`main` and nightly runs only, never pull requests)
+
+### Published site
+
+https://yeshallbeasgods.github.io/ephemeral-blazing-berserker/
+
+| Path | Contents |
+|------|----------|
+| `report/` | pytest-html report from the latest run |
+| `status.json` | Machine-readable run summary (schema 1, shared by my other test repos): overall result, per-job results, test counts, commit and run links |
+
+`scripts/build_status.py` builds `status.json` from the pytest junit XML. Run its tests with `pytest scripts -o addopts=""`.
 
 ## License
 
