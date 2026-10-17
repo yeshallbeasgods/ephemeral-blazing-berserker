@@ -6,6 +6,63 @@ Web and mobile-emulation smoke tests (Sauce Demo), a custom utility library, and
 
 A Python Selenium test automation framework targeting the [Sauce Demo](https://www.saucedemo.com) application. Built to demonstrate professional QA engineering practices including the Page Object Model, reusable utility libraries, mobile emulation, and CI/CD integration.
 
+## The Utility Library in Action
+
+Tests contain no selectors and no waits. The timing logic lives in the utility library, behind the page objects, so a test reads like the user journey:
+
+```python
+# tests/web/test_cart_smoke.py
+ebb.inventory_page.add_to_cart("Sauce Labs Backpack")
+ebb.inventory_page.wait_for_cart_count(1)
+ebb.inventory_page.cart_icon().click()
+wu.wait_for_url_to_contain(browser, "cart")
+assert "Sauce Labs Backpack" in ebb.cart_page.get_cart_item_names()
+```
+
+In mobile emulation, the same journey needs a click that survives animations in a single-page app. The mobile page object overrides only that one method and delegates to `BrowserUtils`, which waits for the element to be clickable and for its position and size to stop changing (`WaitUtils.wait_for_element_stable`) before it acts:
+
+```python
+# pages/mobile/inventory_page_mobile.py
+class MobileInventoryPage(InventoryPage):
+    def add_to_cart(self, item_name):
+        locator = self.add_to_cart_locator(item_name)
+        BrowserUtils.mobile_click(self.driver, locator)
+```
+
+`mobile_click` prevents timing problems by waiting before it acts. `BrowserUtils.robust_click` handles the other kind: a click that fails because the page changed underneath it. It waits for the element to be visible and clickable, and if the click is intercepted by an overlay or the element goes stale because the DOM re-rendered, it retries a limited number of times before raising a clear error:
+
+```python
+# utils/browser_utils.py (core of robust_click)
+for attempt in range(retries):
+    try:
+        WebDriverWait(driver, timeout).until(ec.visibility_of(element))
+        WebDriverWait(driver, timeout).until(ec.element_to_be_clickable(element)).click()
+        return
+    except (ElementClickInterceptedException, StaleElementReferenceException):
+        if attempt < retries - 1:
+            time.sleep(0.5)  # Small delay before retrying
+        else:
+            raise ElementClickInterceptedException(f"Failed to click {element} after {retries} attempts.")
+```
+
+It catches only the two exceptions that mean "try again" and lets everything else fail immediately, so a real bug is not hidden by a retry. A page object would call it as `BrowserUtils.robust_click(self.driver, element)`; the current page objects don't need it yet.
+
+When a test fails, `DebugUtils.dump_page_state` runs automatically from a pytest hook in `conftest.py`. It saves a screenshot and a JSON snapshot of the page (an abbreviated example):
+
+```json
+{
+  "url": "https://www.saucedemo.com/inventory.html",
+  "title": "Swag Labs",
+  "data_test_elements": [
+    { "dataTest": "shopping-cart-link", "tag": "A", "visible": true }
+  ],
+  "interactive_elements": ["..."],
+  "javascript_errors": []
+}
+```
+
+In CI the snapshot is also printed to the job log, so a failure can usually be diagnosed without re-running. Details on each utility are in [Utility Library](#utility-library) below.
+
 ## Tech Stack
 
 - Python 3.13
