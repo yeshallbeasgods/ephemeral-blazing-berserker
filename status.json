@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "project": "ephemeral-blazing-berserker",
+  "overall": "passed",
+  "generatedAt": "2026-10-17T21:44:40.485Z",
+  "trigger": "push",
+  "branch": "main",
+  "commit": {
+    "sha": "64ad8046fd09668e029255cabf4ccf1c90447a7d",
+    "short": "64ad804",
+    "url": "https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/commit/64ad8046fd09668e029255cabf4ccf1c90447a7d"
+  },
+  "run": {
+    "id": "39072147826",
+    "url": "https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/runs/39072147826"
+  },
+  "layers": {
+    "lint": "success",
+    "smoke": "success"
+  },
+  "tests": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "broken": 0,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "links": {
+    "report": "report/",
+    "testHealth": null
+  }
+}
