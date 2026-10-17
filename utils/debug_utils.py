@@ -146,7 +146,8 @@ class DebugUtils:
     def dump_page_state(driver, filename="page_state", path="reports/screenshots"):
         # Captures everything useful about current page state in one call
         # Designed for agent consumption when debugging failures in CI
-        # Returns None if browser is unavailable (e.g. already closed)
+        # Returns the state dict, plus a "files" entry with the paths of the .json and .png it wrote
+        # (the "files" entry is not in the .json itself). Returns None if browser is unavailable
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         try:
             state = {
@@ -156,11 +157,12 @@ class DebugUtils:
                 "interactive_elements": DebugUtils.get_interactive_elements(driver),
                 "javascript_errors": DebugUtils.check_javascript_errors(driver)
             }
-            filepath = f"{path}/{filename}_{timestamp}.json"
-            with open(filepath, "w", encoding="utf-8") as f:
+            json_path = f"{path}/{filename}_{timestamp}.json"
+            screenshot_path = f"{path}/{filename}_{timestamp}.png"
+            with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(state, f, indent=2)
-            driver.save_screenshot(f"{path}/{filename}_{timestamp}.png")
-            return state
+            driver.save_screenshot(screenshot_path)
+            return {**state, "files": {"json": json_path, "screenshot": screenshot_path}}
         except WebDriverException:
             # Browser window may have already been closed by the time this runs
             return None

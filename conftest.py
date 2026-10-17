@@ -2,6 +2,7 @@ import json
 import os
 import pytest
 import warnings
+import allure
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.options import Options as ChromeOptions
@@ -9,6 +10,8 @@ from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from pages.page_manager import PageManager
 from config.settings import SauceConfig
+from utils.allure_environment import write_environment_properties
+from utils.allure_labels import labels_for
 from utils.debug_utils import DebugUtils
 from utils.wait_utils import WaitUtils
 
@@ -87,6 +90,14 @@ def _build_driver(request):
     driver.implicitly_wait(SauceConfig.DEFAULT_TIMEOUT)
     return driver
 
+@pytest.fixture(autouse=True)
+def allure_labels(request):
+    # Feeds the Allure report's grouping and coverage map. Harmless when --alluredir is not passed.
+    epic, feature = labels_for(request.node.path)
+    allure.dynamic.epic(epic)
+    allure.dynamic.feature(feature)
+    allure.dynamic.story(request.node.name)
+
 @pytest.fixture(scope="function")
 def browser(request):
     driver = _build_driver(request)
@@ -153,7 +164,22 @@ def pytest_runtest_makereport(item, call):
         if browser:
             try:
                 state = DebugUtils.dump_page_state(browser, filename=item.name, path="reports/screenshots")
-                if os.environ.get("CI") and state:
-                    print(f"\n--- Page State on Failure ({item.name}) ---\n{json.dumps(state, indent=2)}")
+                if state:
+                    files = state.pop("files")
+                    allure.attach.file(files["screenshot"], name="Failure screenshot", attachment_type=allure.attachment_type.PNG)
+                    allure.attach.file(files["json"], name="Page state", attachment_type=allure.attachment_type.JSON)
+                    if os.environ.get("CI"):
+                        print(f"\n--- Page State on Failure ({item.name}) ---\n{json.dumps(state, indent=2)}")
             except Exception as exc:
                 warnings.warn(f"dump_page_state failed for {item.name}: {exc}")
+
+def pytest_sessionfinish(session, exitstatus):
+    # Shown on the Allure report's overview. Only written when results are being collected.
+    alluredir = session.config.option.allure_report_dir
+    if alluredir:
+        write_environment_properties(
+            alluredir,
+            browser=session.config.getoption("--custom-browser"),
+            base_url=SauceConfig().base_url,
+            env=os.environ,
+        )
