@@ -10,7 +10,7 @@ MarkupSafe==3.0.3
 outcome==1.3.0.post0
 packaging==26.0
 pluggy==1.6.0
-Pygments==2.19.2
+Pygments==2.20.0
 PySocks==1.7.1
 pytest==9.0.2
 pytest-html==4.2.0
