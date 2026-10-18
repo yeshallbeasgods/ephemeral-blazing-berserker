@@ -69,7 +69,8 @@ In CI the snapshot is also printed to the job log, so a failure can usually be d
 - Selenium WebDriver
 - pytest
 - webdriver-manager
-- pytest-html
+- pytest-html (local report)
+- Allure (allure-pytest, Allure 3 CLI) for the published report
 - ruff
 
 ## Project Structure
@@ -95,8 +96,12 @@ ephemeral-blazing-berserker/
 ├── scripts/
 │   ├── build_status.py             # Builds status.json from the pytest junit XML
 │   └── test_build_status.py        # Tests for build_status.py (run separately, see CI/CD)
-├── site/
-│   └── index.html                  # Pages root; redirects to report/
+├── site/                           # Landing page published to GitHub Pages
+│   ├── index.html                  # Reads status.json
+│   ├── app.js
+│   ├── style.css
+│   └── report/
+│       └── index.html              # Redirect so Allure's "Back to overview" returns to the landing page
 ├── tests/
 │   ├── mobile/
 │   │   └── test_cart_mobile.py
@@ -106,8 +111,11 @@ ephemeral-blazing-berserker/
 ├── utils/
 │   ├── browser_utils.py            # Interaction helpers (clicks, scroll, keyboard, windows)
 │   ├── wait_utils.py               # Explicit wait strategies and polling helpers
-│   └── debug_utils.py             # Debugging and inspection utilities (see below)
-├── reports/                        # Auto-generated HTML test reports
+│   ├── debug_utils.py              # Debugging and inspection utilities (see below)
+│   ├── allure_labels.py            # Derives Allure epic/feature from the test file path
+│   └── allure_environment.py       # Writes the Allure environment.properties file
+├── allurerc.json                   # Allure 3 report configuration (awesome report + dashboard)
+├── reports/                        # Local pytest-html report, junit XML, failure screenshots
 ├── conftest.py                     # Fixtures and browser configuration
 ├── pytest.ini                      # pytest settings and markers
 ├── requirements.txt                # Python dependencies
@@ -193,11 +201,19 @@ pytest --user-type=problem
 pytest -m mobile --custom-browser=chrome --custom-device=android --user-type=problem -k "test_add_to_cart"
 ```
 
-### Generate HTML report
-Reports are generated automatically after every run at:
+### Reports
+A pytest-html report is generated automatically after every run at:
 ```
 reports/test-report.html
 ```
+
+To build the same Allure report CI publishes (needs Node.js):
+```bash
+pytest -m "smoke and not mobile" --alluredir=allure-results
+npx --yes allure@3.21.0 generate allure-results --clean
+npx --yes allure@3.21.0 open allure-report
+```
+Trend charts need earlier runs: `allure-history/history.jsonl` builds up locally as you generate repeatedly.
 
 ## Test Markers
 
@@ -235,7 +251,7 @@ One workflow, `ci.yml`, runs on every push and pull request to `main`, nightly a
 
 - **Lint** — ruff, plus the tests for `scripts/build_status.py`
 - **Smoke tests** — web smoke suite (mobile tests excluded until the mobile suite is stable) against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 14 days
-- **Report** — builds the site from the test results, even when tests fail
+- **Report** — builds the Allure report, the trends dashboard and `status.json`, even when tests fail; trend history is carried forward from the last published site
 - **Publish** — pushes the site to GitHub Pages (`main` and nightly runs only, never pull requests)
 
 ### Published site
@@ -244,10 +260,12 @@ https://yeshallbeasgods.github.io/ephemeral-blazing-berserker/
 
 | Path | Contents |
 |------|----------|
-| `report/` | pytest-html report from the latest run |
+| `/` | Landing page showing the latest run (reads `status.json`) |
+| `report/awesome/` | Allure report: suites, steps, failure screenshots and page-state attachments, grouped by epic, feature and story |
+| `report/dashboard/` | Allure dashboard: charts and trends across the last 30 runs |
 | `status.json` | Machine-readable run summary (schema 1, shared by my other test repos): overall result, per-job results, test counts, commit and run links |
 
-`scripts/build_status.py` builds `status.json` from the pytest junit XML. Run its tests with `pytest scripts -o addopts=""`.
+`scripts/build_status.py` builds `status.json` from the pytest junit XML. The pytest-html report is no longer published; CI keeps it as a downloadable artifact. Run its tests with `pytest scripts -o addopts=""`.
 
 ## License
 
@@ -259,7 +277,8 @@ MIT — see [LICENSE](LICENSE) for details.
 - [x] Web smoke tests — login and cart flows
 - [x] Utility library — BrowserUtils, WaitUtils, DebugUtils
 - [x] Mobile emulation with MobilePageManager and mobile page object layer
-- [x] GitHub Actions CI — lint and test workflows on push and PR
+- [x] GitHub Actions CI — lint, smoke tests, report and Pages publish on push, PR and nightly
+- [x] Allure reporting — report, trends dashboard and failure attachments published to GitHub Pages
 - [x] Failure artifacts — screenshot and page state JSON captured automatically on test failure
 
 **In progress**
@@ -268,4 +287,3 @@ MIT — see [LICENSE](LICENSE) for details.
 **Upcoming**
 - [ ] API tests — OpenWeather current weather endpoint using requests; parametrized cities, schema validation, environment-managed API key
 - [ ] Data-driven tests — SQLite fixtures for product test data, replacing hardcoded strings in cart assertions
-- [ ] Allure reporting — rich test reports with screenshot attachments alongside existing pytest-html

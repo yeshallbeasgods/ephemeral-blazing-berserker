@@ -78,8 +78,9 @@ def build_status(tests: dict, env: os._Environ | dict) -> dict:
         "run": {"id": run_id, "url": f"{repo_url}/actions/runs/{run_id}"},
         "layers": layers,
         "tests": tests,
-        # report is relative to this project's own Pages root. No trends page, so that key is omitted.
-        "links": {"report": "report/", "testHealth": None},
+        # Both links are relative to this project's own Pages root.
+        # report: the full Allure report. trends: charts across runs.
+        "links": {"report": "report/awesome/", "trends": "report/dashboard/", "testHealth": None},
     }
 
 

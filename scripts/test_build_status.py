@@ -83,7 +83,7 @@ def test_status_matches_the_contract():
     assert status["commit"]["url"] == "https://github.com/owner/some-repo/commit/" + ENV["GITHUB_SHA"]
     assert status["run"]["url"] == "https://github.com/owner/some-repo/actions/runs/42"
     assert status["layers"] == {"lint": "success", "smoke": "success"}
-    assert status["links"] == {"report": "report/", "testHealth": None}
+    assert status["links"] == {"report": "report/awesome/", "trends": "report/dashboard/", "testHealth": None}
     assert status["generatedAt"].endswith("Z")
 
 

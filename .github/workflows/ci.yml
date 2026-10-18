@@ -57,7 +57,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Run smoke tests
-        run: pytest -m "smoke and not mobile" --junitxml=reports/junit.xml
+        run: pytest -m "smoke and not mobile" --junitxml=reports/junit.xml --alluredir=allure-results
       - name: Upload test artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -68,8 +68,15 @@ jobs:
             reports/junit.xml
             reports/test-report.html
             reports/screenshots/
+      - name: Upload Allure results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-results
+          retention-days: 14
+          path: allure-results
 
-  # Builds the site (HTML report and status.json). Read-only: it gets no write access.
+  # Builds the site (Allure report, status.json, landing page). Read-only: it gets no write access.
   report:
     name: Report
     needs: [lint, smoke]
@@ -84,21 +91,54 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-      # Missing when lint failed and smoke never ran. build_status.py then reports zero tests.
+      # Node is only here to run the Allure CLI.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      # Missing when lint failed and smoke never ran. The report is then skipped and status.json
+      # reports zero tests.
       - name: Download test artifacts
         uses: actions/download-artifact@v8
         continue-on-error: true
         with:
           name: test-artifacts
           path: reports
+      - name: Download Allure results
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: allure-results
+          path: allure-results
+      # The last published site holds the history file behind Allure's trend charts.
+      # Before the first publish there is no gh-pages branch, so this step is allowed to fail.
+      - name: Fetch the published site
+        uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: published
+          persist-credentials: false
+      - name: Carry history forward
+        run: |
+          mkdir -p allure-history
+          if [ -f published/history/history.jsonl ]; then
+            cp published/history/history.jsonl allure-history/history.jsonl
+          fi
+      # allurerc.json appends this run to the history file as it generates.
+      - name: Generate the Allure report
+        if: ${{ hashFiles('allure-results/**') != '' }}
+        run: npx --yes allure@3.21.0 generate allure-results --clean
       - name: Build the site
         env:
           LINT_RESULT: ${{ needs.lint.result }}
           SMOKE_RESULT: ${{ needs.smoke.result }}
         run: |
-          mkdir -p publish/report
+          mkdir -p publish/history
+          # Order matters: site/report/index.html must land after the report, so it replaces Allure's
+          # plugin-chooser page and "Back to overview" returns to the landing page instead.
+          if [ -d allure-report ]; then cp -r allure-report publish/report; fi
           cp -r site/. publish/
-          if [ -f reports/test-report.html ]; then cp reports/test-report.html publish/report/index.html; fi
+          if [ -f allure-history/history.jsonl ]; then cp allure-history/history.jsonl publish/history/history.jsonl; fi
           python scripts/build_status.py reports/junit.xml publish/status.json
       - name: Upload the site
         uses: actions/upload-artifact@v7
@@ -128,7 +168,7 @@ jobs:
           path: publish
       # keep_files leaves earlier files in place and overwrites the ones that changed.
       # Never add force_orphan: the repo ruleset blocks force pushes to gh-pages.
-      - uses: peaceiris/actions-gh-pages@v4
+      - uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./publish

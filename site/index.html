@@ -1,5 +1,63 @@
 <!doctype html>
-<meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=report/">
-<title>Redirecting to the test report</title>
-<a href="report/">Test report</a>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Selenium + Python: Latest Results</title>
+		<meta name="description" content="Latest CI results for a Selenium and Python (pytest) test automation project." />
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<main>
+			<header>
+				<a class="back" href="https://yeshallbeasgods.github.io/">← All projects</a>
+				<p class="eyebrow">Selenium + Python</p>
+				<h1>Latest test results</h1>
+				<p class="lede">
+					Sauce Demo web smoke tests written with Selenium and pytest, run by GitHub Actions on every push
+					to main and nightly.
+				</p>
+			</header>
+
+			<section class="card" id="status-card" aria-live="polite">
+				<p id="status-chip" class="chip chip-unknown">Loading…</p>
+				<p id="status-detail" class="detail"></p>
+
+				<ul id="layers" class="layers" hidden></ul>
+
+				<dl id="facts" class="facts" hidden>
+					<div>
+						<dt>Tests</dt>
+						<dd id="fact-tests"></dd>
+					</div>
+					<div>
+						<dt>Run</dt>
+						<dd id="fact-date"></dd>
+					</div>
+					<div>
+						<dt>Trigger</dt>
+						<dd id="fact-trigger"></dd>
+					</div>
+					<div>
+						<dt>Commit</dt>
+						<dd><a id="fact-commit" rel="noopener"></a></dd>
+					</div>
+				</dl>
+
+				<div class="actions">
+					<a class="button primary" id="link-report" href="report/awesome/">Open the full Allure report</a>
+					<a class="button" id="link-trends" hidden>Trends across runs</a>
+					<a class="button" id="link-run" rel="noopener" hidden>View the CI run</a>
+					<span class="button disabled" aria-disabled="true">Test health: coming soon</span>
+				</div>
+			</section>
+
+			<footer>
+				<a href="https://github.com/yeshallbeasgods/ephemeral-blazing-berserker" rel="noopener"
+					>Source on GitHub</a
+				>
+			</footer>
+		</main>
+		<script src="app.js"></script>
+	</body>
+</html>

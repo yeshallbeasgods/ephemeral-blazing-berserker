@@ -27,6 +27,9 @@ ENV/
 # Test reports and artifacts
 reports/*.html
 reports/junit.xml
+allure-results/
+allure-report/
+allure-history/
 reports/screenshots/*.png
 reports/screenshots/*.json
 !reports/.gitkeep
