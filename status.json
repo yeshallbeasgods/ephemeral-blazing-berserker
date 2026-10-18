@@ -1,33 +1,34 @@
 {
   "schema": 1,
   "project": "ephemeral-blazing-berserker",
-  "overall": "failed",
-  "generatedAt": "2026-10-17T23:51:42.358Z",
+  "overall": "passed",
+  "generatedAt": "2026-10-18T00:06:13.014Z",
   "trigger": "push",
   "branch": "main",
   "commit": {
-    "sha": "f847582bb1f4e00b4c00c6b1813a8b6e68a6b63a",
-    "short": "f847582",
-    "url": "https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/commit/f847582bb1f4e00b4c00c6b1813a8b6e68a6b63a"
+    "sha": "c21b9314310c7e0ec0772f83380f40b07080a08e",
+    "short": "c21b931",
+    "url": "https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/commit/c21b9314310c7e0ec0772f83380f40b07080a08e"
   },
   "run": {
-    "id": "39080567745",
-    "url": "https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/runs/39080567745"
+    "id": "39081460119",
+    "url": "https://github.com/yeshallbeasgods/ephemeral-blazing-berserker/actions/runs/39081460119"
   },
   "layers": {
     "lint": "success",
-    "smoke": "failure"
+    "smoke": "success"
   },
   "tests": {
     "total": 6,
-    "passed": 5,
-    "failed": 1,
+    "passed": 6,
+    "failed": 0,
     "broken": 0,
     "skipped": 0,
     "flaky": 0
   },
   "links": {
-    "report": "report/",
+    "report": "report/awesome/",
+    "trends": "report/dashboard/",
     "testHealth": null
   }
 }

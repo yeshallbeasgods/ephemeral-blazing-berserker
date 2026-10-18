@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta charset="utf-8">
+    <title> Selenium + Python: Sauce Demo </title>
+    <link rel="icon" href="favicon.ico">
+    
+    <script>
+      window.allureReportOptions = {"reportName":"Selenium + Python: Sauce Demo","logo":"","theme":"light","reportLanguage":"en","createdAt":1792281972833,"reportUuid":"04f11bba-a3cc-45cb-8572-1eba6f5dbc25","allureVersion":"3.21.0","overviewHref":"../index.html"}
+    </script>
+</head>
+<body>
+    <div id="app"></div>
+    
+    <script>
+      const { origin, pathname } = window.location; 
+      const url = new URL(pathname, origin);
+      const baseEl = document.createElement("base");
+      
+      baseEl.href = url.toString();
+      
+      window.document.head.appendChild(baseEl);
+    </script>
+  
+    <script>
+      window.allure = window.allure || {};
+    </script>
+    <script   src="app-cf33f3d7bb0e409dfd2f.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNDJ3J7WT0"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LNDJ3J7WT0', {
+          "report": "dashboard",
+          "allureVersion": "3.21.0",
+          "reportUuid": "04f11bba-a3cc-45cb-8572-1eba6f5dbc25",
+          "single_file": ""
+        });
+    </script>
+    
+      <script async>
+        window.allureReportDataReady = true;
+      </script>
+    
+</body>
+</html>
