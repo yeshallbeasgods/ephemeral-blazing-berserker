@@ -250,7 +250,7 @@ Two categories of debugging support:
 One workflow, `ci.yml`, runs on every push and pull request to `main`, nightly at 11:41 UTC, and on demand:
 
 - **Lint** — ruff, plus the tests for `scripts/build_status.py`
-- **Smoke tests** — web smoke suite (mobile tests excluded until the mobile suite is stable) against Chrome headless; on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 14 days
+- **Smoke tests** — web smoke suite (mobile tests excluded until the mobile suite is stable) against Chrome headless, with one retry for failed tests (`--reruns 1`, CI only; a test that fails then passes counts as passed and flaky); on failure, full page state (URL, DOM elements, JS errors) is printed to the job logs and artifacts (screenshot + JSON) are uploaded and retained for 14 days
 - **Report** — builds the Allure report, the trends dashboard and `status.json`, even when tests fail; trend history is carried forward from the last published site
 - **Publish** — pushes the site to GitHub Pages (`main` and nightly runs only, never pull requests)
 
@@ -265,7 +265,7 @@ https://yeshallbeasgods.github.io/ephemeral-blazing-berserker/
 | `report/dashboard/` | Allure dashboard: charts and trends across the last 30 runs |
 | `status.json` | Machine-readable run summary (schema 1, shared by my other test repos): overall result, per-job results, test counts, commit and run links |
 
-`scripts/build_status.py` builds `status.json` from the pytest junit XML. The pytest-html report is no longer published; CI keeps it as a downloadable artifact. Run its tests with `pytest scripts -o addopts=""`.
+`scripts/build_status.py` builds `status.json` from the Allure result files, counting each test once by its last attempt. (The junit XML can't be used: with retries it records a retried attempt as an empty, passing-looking test.) The pytest-html report is no longer published; CI keeps it as a downloadable artifact. Run its tests with `pytest scripts -o addopts=""`.
 
 ## License
 

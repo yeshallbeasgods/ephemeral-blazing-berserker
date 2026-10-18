@@ -18,54 +18,82 @@ ENV = {
 }
 NO_TESTS = {"total": 0, "passed": 0, "failed": 0, "broken": 0, "skipped": 0, "flaky": 0}
 
-PASS = '<testcase classname="t" name="{}" />'
-FAIL = '<testcase classname="t" name="{}"><failure message="x">trace</failure></testcase>'
-ERROR = '<testcase classname="t" name="{}"><error message="setup">trace</error></testcase>'
-SKIP = '<testcase classname="t" name="{}"><skipped type="pytest.skip" message="no" /></testcase>'
-XFAIL = '<testcase classname="t" name="{}"><skipped type="pytest.xfail" message="" /></testcase>'
-
-
 @pytest.fixture
-def junit(tmp_path):
-    def write(*cases):
-        path = tmp_path / "junit.xml"
-        path.write_text(f'<testsuites><testsuite name="pytest">{"".join(cases)}</testsuite></testsuites>')
-        return path
+def results(tmp_path):
+    """Write one Allure result file per call. Calls with the same name are attempts of the same test."""
+    counter = iter(range(1000))
+
+    def write(name, status, stop=None, message=None):
+        n = next(counter)
+        result = {"name": name, "historyId": f"id-{name}", "status": status, "stop": stop if stop is not None else n}
+        if message:
+            result["statusDetails"] = {"message": message}
+        (tmp_path / f"{n}-result.json").write_text(json.dumps(result))
+        return tmp_path
 
     return write
 
 
-def test_counts_each_outcome(junit):
-    path = junit(PASS.format("a"), FAIL.format("b"), ERROR.format("c"), SKIP.format("d"))
+def test_counts_each_outcome(results):
+    results("a", "passed")
+    results("b", "failed")
+    results("c", "broken")
+    path = results("d", "skipped")
     assert count_tests(path) == {**NO_TESTS, "total": 4, "passed": 1, "failed": 1, "broken": 1, "skipped": 1}
 
 
-def test_xfail_counts_as_passed_not_skipped(junit):
-    assert count_tests(junit(XFAIL.format("a"))) == {**NO_TESTS, "total": 1, "passed": 1}
+def test_xfail_counts_as_passed_not_skipped(results):
+    path = results("a", "skipped", message="XFAIL  AssertionError: assert False")
+    assert count_tests(path) == {**NO_TESTS, "total": 1, "passed": 1}
 
 
-def test_retry_that_passes_is_passed_and_flaky(junit):
-    path = junit(FAIL.format("a"), PASS.format("a"))
+def test_a_normal_skip_stays_skipped(results):
+    path = results("a", "skipped", message="Skipped: no browser")
+    assert count_tests(path) == {**NO_TESTS, "total": 1, "skipped": 1}
+
+
+def test_xpass_counts_as_passed(results):
+    assert count_tests(results("a", "passed", message="XPASS")) == {**NO_TESTS, "total": 1, "passed": 1}
+
+
+def test_retry_that_passes_is_passed_and_flaky(results):
+    results("a", "failed")
+    path = results("a", "passed")
     assert count_tests(path) == {**NO_TESTS, "total": 1, "passed": 1, "flaky": 1}
 
 
-def test_retry_that_keeps_failing_is_one_failure(junit):
-    path = junit(FAIL.format("a"), FAIL.format("a"))
+def test_retry_that_keeps_failing_is_one_failure(results):
+    results("a", "failed")
+    path = results("a", "failed")
     assert count_tests(path) == {**NO_TESTS, "total": 1, "failed": 1}
 
 
-def test_pass_then_teardown_error_is_broken(junit):
-    path = junit(PASS.format("a"), ERROR.format("a"))
-    assert count_tests(path) == {**NO_TESTS, "total": 1, "broken": 1}
+def test_last_attempt_is_chosen_by_stop_time_not_file_order(results):
+    results("a", "passed", stop=200)
+    path = results("a", "failed", stop=100)  # written later, but it ran earlier
+    assert count_tests(path) == {**NO_TESTS, "total": 1, "passed": 1, "flaky": 1}
 
 
-def test_same_name_in_different_classes_is_two_tests(junit):
-    other = PASS.format("a").replace('classname="t"', 'classname="u"')
-    assert count_tests(junit(PASS.format("a"), other))["total"] == 2
+def test_pass_then_a_later_failure_is_failed(results):
+    results("a", "passed", stop=100)
+    path = results("a", "failed", stop=200)
+    assert count_tests(path) == {**NO_TESTS, "total": 1, "failed": 1}
 
 
-def test_missing_file_counts_nothing(tmp_path):
-    assert count_tests(tmp_path / "nope.xml") == NO_TESTS
+def test_unreadable_status_is_never_counted_as_a_pass(results):
+    assert count_tests(results("a", "unknown")) == {**NO_TESTS, "total": 1, "broken": 1}
+
+
+def test_other_files_in_the_folder_are_ignored(results):
+    path = results("a", "passed")
+    (path / "environment.properties").write_text("Browser=chrome\n")
+    (path / "x-container.json").write_text("{}")
+    (path / "x-attachment.json").write_text("{}")
+    assert count_tests(path) == {**NO_TESTS, "total": 1, "passed": 1}
+
+
+def test_missing_folder_counts_nothing(tmp_path):
+    assert count_tests(tmp_path / "nope") == NO_TESTS
 
 
 def test_status_passes_only_when_every_layer_succeeds():
@@ -87,11 +115,11 @@ def test_status_matches_the_contract():
     assert status["generatedAt"].endswith("Z")
 
 
-def test_main_writes_json(junit, tmp_path, monkeypatch):
+def test_main_writes_json(results, tmp_path, monkeypatch):
     for key, value in ENV.items():
         monkeypatch.setenv(key, value)
     out = tmp_path / "nested" / "status.json"
-    monkeypatch.setattr(sys, "argv", ["build_status.py", str(junit(PASS.format("a"))), str(out)])
+    monkeypatch.setattr(sys, "argv", ["build_status.py", str(results("a", "passed")), str(out)])
     build_status.main()
     written = json.loads(out.read_text())
     assert written["tests"]["passed"] == 1

@@ -57,7 +57,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Run smoke tests
-        run: pytest -m "smoke and not mobile" --junitxml=reports/junit.xml --alluredir=allure-results
+        run: pytest -m "smoke and not mobile" --reruns 1 --junitxml=reports/junit.xml --alluredir=allure-results
       - name: Upload test artifacts
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -139,7 +139,7 @@ jobs:
           if [ -d allure-report ]; then cp -r allure-report publish/report; fi
           cp -r site/. publish/
           if [ -f allure-history/history.jsonl ]; then cp allure-history/history.jsonl publish/history/history.jsonl; fi
-          python scripts/build_status.py reports/junit.xml publish/status.json
+          python scripts/build_status.py allure-results publish/status.json
       - name: Upload the site
         uses: actions/upload-artifact@v7
         with:

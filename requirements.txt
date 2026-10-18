@@ -17,6 +17,7 @@ PySocks==1.7.1
 pytest==9.0.2
 pytest-html==4.2.0
 pytest-metadata==3.1.1
+pytest-rerunfailures==16.7
 python-dotenv==1.2.2
 requests==2.32.5
 selenium==4.41.0
