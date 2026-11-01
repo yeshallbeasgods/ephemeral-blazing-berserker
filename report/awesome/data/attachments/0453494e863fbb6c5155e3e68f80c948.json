@@ -1,0 +1,390 @@
+{
+  "url": "https://www.saucedemo.com/cart.html",
+  "title": "Swag Labs",
+  "data_test_elements": [
+    {
+      "dataTest": "header-container",
+      "tag": "HEADER",
+      "text": "Open Menu\nSwag Labs\n2\nYour Cart",
+      "visible": true
+    },
+    {
+      "dataTest": "primary-header",
+      "tag": "DIV",
+      "text": "Open Menu\nSwag Labs\n2",
+      "visible": true
+    },
+    {
+      "dataTest": "open-menu",
+      "tag": "IMG",
+      "text": "",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-sidebar-link",
+      "tag": "A",
+      "text": "All Items",
+      "visible": false
+    },
+    {
+      "dataTest": "dynamic-catalog-sidebar-link",
+      "tag": "A",
+      "text": "Dynamic Catalog",
+      "visible": false
+    },
+    {
+      "dataTest": "about-sidebar-link",
+      "tag": "A",
+      "text": "About",
+      "visible": false
+    },
+    {
+      "dataTest": "logout-sidebar-link",
+      "tag": "A",
+      "text": "Logout",
+      "visible": false
+    },
+    {
+      "dataTest": "reset-sidebar-link",
+      "tag": "A",
+      "text": "Reset App State",
+      "visible": false
+    },
+    {
+      "dataTest": "close-menu",
+      "tag": "IMG",
+      "text": "",
+      "visible": false
+    },
+    {
+      "dataTest": "shopping-cart-link",
+      "tag": "A",
+      "text": "2",
+      "visible": true
+    },
+    {
+      "dataTest": "shopping-cart-badge",
+      "tag": "SPAN",
+      "text": "2",
+      "visible": true
+    },
+    {
+      "dataTest": "secondary-header",
+      "tag": "DIV",
+      "text": "Your Cart",
+      "visible": true
+    },
+    {
+      "dataTest": "title",
+      "tag": "SPAN",
+      "text": "Your Cart",
+      "visible": true
+    },
+    {
+      "dataTest": "cart-contents-container",
+      "tag": "DIV",
+      "text": "QTYDescription\n1\nSauce Labs Backpack\ncarry.allTheT",
+      "visible": true
+    },
+    {
+      "dataTest": "cart-list",
+      "tag": "DIV",
+      "text": "QTYDescription\n1\nSauce Labs Backpack\ncarry.allTheT",
+      "visible": true
+    },
+    {
+      "dataTest": "cart-quantity-label",
+      "tag": "DIV",
+      "text": "QTY",
+      "visible": true
+    },
+    {
+      "dataTest": "cart-desc-label",
+      "tag": "DIV",
+      "text": "Description",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item",
+      "tag": "DIV",
+      "text": "1\nSauce Labs Backpack\ncarry.allTheThings() with th",
+      "visible": true
+    },
+    {
+      "dataTest": "item-quantity",
+      "tag": "DIV",
+      "text": "1",
+      "visible": true
+    },
+    {
+      "dataTest": "item-4-title-link",
+      "tag": "A",
+      "text": "Sauce Labs Backpack",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item-name",
+      "tag": "DIV",
+      "text": "Sauce Labs Backpack",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item-desc",
+      "tag": "DIV",
+      "text": "carry.allTheThings() with the sleek, streamlined S",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item-price",
+      "tag": "DIV",
+      "text": "$29.99",
+      "visible": true
+    },
+    {
+      "dataTest": "remove-sauce-labs-backpack",
+      "tag": "BUTTON",
+      "text": "Remove",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item",
+      "tag": "DIV",
+      "text": "1\nSauce Labs Bike Light\nA red light isn't the desi",
+      "visible": true
+    },
+    {
+      "dataTest": "item-quantity",
+      "tag": "DIV",
+      "text": "1",
+      "visible": true
+    },
+    {
+      "dataTest": "item-0-title-link",
+      "tag": "A",
+      "text": "Sauce Labs Bike Light",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item-name",
+      "tag": "DIV",
+      "text": "Sauce Labs Bike Light",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item-desc",
+      "tag": "DIV",
+      "text": "A red light isn't the desired state in testing but",
+      "visible": true
+    },
+    {
+      "dataTest": "inventory-item-price",
+      "tag": "DIV",
+      "text": "$9.99",
+      "visible": true
+    },
+    {
+      "dataTest": "remove-sauce-labs-bike-light",
+      "tag": "BUTTON",
+      "text": "Remove",
+      "visible": true
+    },
+    {
+      "dataTest": "continue-shopping",
+      "tag": "BUTTON",
+      "text": "Continue Shopping",
+      "visible": true
+    },
+    {
+      "dataTest": "checkout",
+      "tag": "BUTTON",
+      "text": "Checkout",
+      "visible": true
+    },
+    {
+      "dataTest": "footer",
+      "tag": "FOOTER",
+      "text": "X\nFacebook\nLinkedIn\n\u00a9 2026 Sauce Labs. All Rights ",
+      "visible": true
+    },
+    {
+      "dataTest": "social-x",
+      "tag": "A",
+      "text": "X",
+      "visible": true
+    },
+    {
+      "dataTest": "social-facebook",
+      "tag": "A",
+      "text": "Facebook",
+      "visible": true
+    },
+    {
+      "dataTest": "social-linkedin",
+      "tag": "A",
+      "text": "LinkedIn",
+      "visible": true
+    },
+    {
+      "dataTest": "footer-copy",
+      "tag": "DIV",
+      "text": "\u00a9 2026 Sauce Labs. All Rights Reserved. Terms of S",
+      "visible": true
+    }
+  ],
+  "interactive_elements": [
+    {
+      "disabled": false,
+      "id": "react-burger-menu-btn",
+      "name": "",
+      "tag": "BUTTON",
+      "text": "Open Menu",
+      "type": "button",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "inventory_sidebar_link",
+      "name": "",
+      "tag": "A",
+      "text": "All Items",
+      "type": "",
+      "visible": false
+    },
+    {
+      "disabled": false,
+      "id": "dynamic_catalog_sidebar_link",
+      "name": "",
+      "tag": "A",
+      "text": "Dynamic Catalog",
+      "type": "",
+      "visible": false
+    },
+    {
+      "disabled": false,
+      "id": "about_sidebar_link",
+      "name": "",
+      "tag": "A",
+      "text": "About",
+      "type": "",
+      "visible": false
+    },
+    {
+      "disabled": false,
+      "id": "logout_sidebar_link",
+      "name": "",
+      "tag": "A",
+      "text": "Logout",
+      "type": "",
+      "visible": false
+    },
+    {
+      "disabled": false,
+      "id": "reset_sidebar_link",
+      "name": "",
+      "tag": "A",
+      "text": "Reset App State",
+      "type": "",
+      "visible": false
+    },
+    {
+      "disabled": false,
+      "id": "react-burger-cross-btn",
+      "name": "",
+      "tag": "BUTTON",
+      "text": "Close Menu",
+      "type": "button",
+      "visible": false
+    },
+    {
+      "disabled": false,
+      "id": "",
+      "name": "",
+      "tag": "A",
+      "text": "2",
+      "type": "",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "item_4_title_link",
+      "name": "",
+      "tag": "A",
+      "text": "Sauce Labs Backpack",
+      "type": "",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "remove-sauce-labs-backpack",
+      "name": "remove-sauce-labs-backpack",
+      "tag": "BUTTON",
+      "text": "Remove",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "item_0_title_link",
+      "name": "",
+      "tag": "A",
+      "text": "Sauce Labs Bike Light",
+      "type": "",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "remove-sauce-labs-bike-light",
+      "name": "remove-sauce-labs-bike-light",
+      "tag": "BUTTON",
+      "text": "Remove",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "continue-shopping",
+      "name": "continue-shopping",
+      "tag": "BUTTON",
+      "text": "Continue Shopping",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "checkout",
+      "name": "checkout",
+      "tag": "BUTTON",
+      "text": "Checkout",
+      "type": "submit",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "",
+      "name": "",
+      "tag": "A",
+      "text": "X",
+      "type": "",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "",
+      "name": "",
+      "tag": "A",
+      "text": "Facebook",
+      "type": "",
+      "visible": true
+    },
+    {
+      "disabled": false,
+      "id": "",
+      "name": "",
+      "tag": "A",
+      "text": "LinkedIn",
+      "type": "",
+      "visible": true
+    }
+  ],
+  "javascript_errors": []
+}
