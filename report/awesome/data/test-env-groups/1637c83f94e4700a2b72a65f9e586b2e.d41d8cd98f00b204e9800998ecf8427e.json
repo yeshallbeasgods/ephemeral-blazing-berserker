@@ -1,1 +1,1 @@
-{"id":"1637c83f94e4700a2b72a65f9e586b2e.d41d8cd98f00b204e9800998ecf8427e","fullName":"tests.web.test_cart_smoke.TestCartSmoke#test_remove_item_from_cart","name":"test_remove_item_from_cart","status":"broken","testResultsByEnv":{"default":"f192aa7f6a6d7a5fc9ce7b1f017be463"}}
+{"id":"1637c83f94e4700a2b72a65f9e586b2e.d41d8cd98f00b204e9800998ecf8427e","fullName":"tests.web.test_cart_smoke.TestCartSmoke#test_remove_item_from_cart","name":"test_remove_item_from_cart","status":"passed","testResultsByEnv":{"default":"83962eb0c1f32cd098d8a433048b76bd"}}
